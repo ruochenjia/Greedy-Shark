@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+		<meta content="utf-8" http-equiv="encoding" />
+		<title>Greedy Shark</title>
+		<style type="text/css">
+body {
+	position: absolute;
+	font-family: monospace;
+	overflow: hidden;
+	height: 100%;
+	width: 100%;
+	margin: 0px
+}
+
+.warnings {
+	background-color: red;
+	color: white;
+	height: fit-content;
+	width: 100%;
+	margin: 0px;
+}
+
+.buttons {
+	height: 96px;
+	width: 100%;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 96px;
+	font-size: 48px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	color: black;
+	background-image: url("assets/ui_btn_normal.png");
+	background-size: 100% 100%;
+}
+
+.buttons:active {
+	background-image: url("assets/ui_btn_clicked.png");
+}
+
+.corner-buttons {
+	position: absolute;
+	height: 72px;
+	width: 72px;
+	padding: 20px;
+	background-image: url("assets/ui_btn_normal.png");
+	background-size: 100% 100%;
+}
+
+.corner-buttons:active {
+	background-image: url("assets/ui_btn_clicked.png");
+}
+
+.right-corner-buttons {
+	position: absolute;
+	height: 72px;
+	width: 72px;
+	padding: 20px;
+	right: 0px;
+	background-image: url("assets/ui_btn_normal.png");
+	background-size: 100% 100%;
+}
+
+.right-corner-buttons:active {
+	background-image: url("assets/ui_btn_clicked.png");
+}
+
+.titles {
+	height: fit-content;
+	width: 100%;
+	text-align: center;
+	font-size: 64px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	color: white;
+	-webkit-text-stroke-width: 1px;
+	-webkit-text-stroke-color: black;
+}
+
+.menu-panels {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 384px;
+	height: 384px;
+	margin-top: -192px;
+	margin-left: -192px;
+}
+
+#menu {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	background-image: url("assets/game_bg.jpg");
+}
+
+#game {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
+canvas {
+	position: absolute;
+	top: 0px;
+	height: 100%;
+	width: 100%;
+	display: block;
+}
+
+#pause-menu {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+#gameover-menu {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+#score {
+	position: absolute;
+	text-align: end;
+	font-size: 48px;
+	width: 100%;
+	height: fit-content;
+	color: white;
+	-webkit-text-stroke-width: 1px;
+	-webkit-text-stroke-color: black;
+}
+
+#final-score {
+	height: fit-content;
+	width: 100%;
+	text-align: center;
+	font-size: 24px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	color: white;
+}
+		</style>
+		<script type="text/javascript" src="js/main.js"></script>
+	</head>
+	<body>
+		<noscript>
+			<p class="warnings"><strong>WARNING: </strong>This website requires JavaScript enabled, please enable it in your browser settings and reload this page.</p>
+		</noscript>
+		<div id="menu">
+			<img class="corner-buttons" src="assets/settings.png" onclick="settings()"/>
+			<img class="right-corner-buttons" src="assets/fullscreen.png" onclick="toggleFullScreen()" />
+			<div class="menu-panels">
+				<h1 class="titles">Greedy Shark</h1>
+				<div class="buttons" onclick="classic()">Classic</div>
+				<div class="buttons" onclick="arcade()">Arcade</div>
+				<div class="buttons" onclick="custom()">Custom</div>
+			</div>
+		</div>
+		<div id="game">
+			<canvas id="canvas" width="1280" height="720">
+				<p class="warnings"><strong>ERROR: </strong>Your browser does not support html5 canvas, please use a supported browser</p>
+			</canvas>
+			<img class="corner-buttons" src="assets/pause.png" onclick="pause()"/>
+			<div id="score"></div>
+			<div id="pause-menu">
+				<div class="menu-panels">
+					<h1 class="titles">Paused</h1>
+					<div class="buttons" onclick="resume()">Resume</div>
+					<div class="buttons" onclick="restart()">Restart</div>
+					<div class="buttons" onclick="stop()">Menu</div>
+				</div>
+			</div>
+			<div id="gameover-menu">
+				<div class="menu-panels">
+					<h1 class="titles">Game Over</h1>
+					<div id="final-score">Score: </div>
+					<div class="buttons" onclick="restart()">Restart</div>
+					<div class="buttons" onclick="stop()">Menu</div>
+				</div>
+			</div>
+		</div>
+		<div style="display: none;">
+			<img id="shark" src="assets/shark.png" />
+			<img id="shark1" src="assets/shark1.png" />
+			<img id="shark-christmas" src="assets/shark_christmas.png" />
+			<img id="spider" src="assets/spider.png" />
+			<img id="coin5" src="assets/coin_5.png" />
+			<img id="coin10" src="assets/coin_10.png" />
+			<img id="coin20" src="assets/coin_20.png" />
+			<img id="coin50" src="assets/coin_50.png" />
+			<img id="coin100" src="assets/coin_100.png" />
+			<img id="coin-unknown" src="assets/coin_unknown.png" />
+			<img id="coin-christmas" src="assets/coin_christmas.png" />
+			<img id="coin-special" src="assets/coin_special.png" />
+			<img id="game-bg1" src="assets/game_bg1.jpg" />
+			<img id="game-bg2" src="assets/game_bg2.jpg" />
+			<img id="treasure" src="assets/treasure.png" />
+		</div>
+		<script type="text/javascript">
+let menu = document.getElementById("menu");
+let game = document.getElementById("game");
+let pauseMenu = document.getElementById("pause-menu");
+let gameOverMenu = document.getElementById("gameover-menu");
+let canvas = document.getElementById("canvas");
+let score = document.getElementById("score");
+let finalScore = document.getElementById("final-score");
+let gfr = null;
+
+game.parentNode.removeChild(game);
+
+function start() {
+	pauseMenu.remove();
+	gameOverMenu.remove();
+	gfr = new GreedyShark(canvas, score, 3, 3);
+	gfr.gameOverCallback = function() {
+		game.appendChild(gameOverMenu);
+		finalScore.innerHTML = "Score: " + gfr.score;
+	};
+	gfr.loop();
+}
+
+function toggleFullScreen() {
+	if (document.fullscreen) {
+		if (document.exitFullscreen)
+			document.exitFullscreen();
+		else if (document.webkitExitFullscreen) /* Safari */
+			document.webkitExitFullscreen();
+		else if (document.msExitFullscreen) /* IE11 */
+			document.msExitFullscreen();
+	} else {
+		let de = document.documentElement;
+		if (de.requestFullscreen)
+			de.requestFullscreen();
+		else if (de.webkitRequestFullscreen) /* Safari */
+			de.webkitRequestFullscreen();
+		else if (de.msRequestFullscreen) /* IE11 */
+			de.msRequestFullscreen();
+	}
+}
+
+function classic() {
+	if (document.readyState === "complete") {
+		menu.parentNode.appendChild(game);
+		menu.parentNode.removeChild(menu);
+		start();
+	}
+}
+
+function arcade() {
+	if (document.readyState === "complete") {
+		alert("Coming soon!");
+	}
+}
+
+function custom() {
+	if (document.readyState === "complete") {
+		alert("Coming soon!");
+	}
+}
+
+function pause() {
+	game.appendChild(pauseMenu);
+	gfr.isPaused = true;
+}
+
+function resume() {
+	game.removeChild(pauseMenu);
+	gfr.isPaused = false;
+}
+
+function restart() {
+	gfr.stop();
+	start();
+}
+
+function stop() {
+	gfr.stop();
+	game.parentNode.appendChild(menu);
+	game.parentNode.removeChild(game);
+}
+
+function settings() {
+	if (document.readyState === "complete") {
+		alert("Coming soon!");
+	}
+}
+		</script>
+	</body>
+</html>
