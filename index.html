@@ -4,6 +4,7 @@
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
 		<meta content="utf-8" http-equiv="encoding" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<link rel="icon" href="./icon.png" />
 		<title>Greedy Shark</title>
 		<style type="text/css">
 body {
@@ -154,6 +155,7 @@ canvas {
 				<body></body>
 			</html>
 		</script>
+		<script type="text/javascript" src="js/userstorage.js"></script>
 		<script type="text/javascript" src="js/main.js"></script>
 	</head>
 	<body>
@@ -229,9 +231,18 @@ function start() {
 	gfr = new GreedyShark(canvas, score, 3, 3);
 	gfr.gameOverCallback = function() {
 		game.appendChild(gameOverMenu);
-		finalScore.innerHTML = "Score: " + gfr.score;
+		let score = gfr.score;
+		let bestScore = parseInt(userData.bestScore);
+		if (score < bestScore) {
+			finalScore.innerHTML = "Score: " + score + " (Best: " + bestScore + ")";
+		} else {
+			finalScore.innerHTML = "Score: " + score;
+			userData.bestScore = score;
+			userData.update();
+		}
 	};
 	gfr.loop();
+	userData.update();
 }
 
 function toggleFullScreen() {
