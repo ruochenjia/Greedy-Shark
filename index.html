@@ -3,6 +3,7 @@
 	<head>
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
 		<meta content="utf-8" http-equiv="encoding" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<title>Greedy Shark</title>
 		<style type="text/css">
 body {
@@ -145,6 +146,14 @@ canvas {
 	color: white;
 }
 		</style>
+		<script type="text/html">
+			<html>
+				<head>
+					<script type="text/javascript" src="js/test.js"></script>
+				</head>
+				<body></body>
+			</html>
+		</script>
 		<script type="text/javascript" src="js/main.js"></script>
 	</head>
 	<body>
@@ -152,7 +161,7 @@ canvas {
 			<p class="warnings"><strong>WARNING: </strong>This website requires JavaScript enabled, please enable it in your browser settings and reload this page.</p>
 		</noscript>
 		<div id="menu">
-			<img class="corner-buttons" src="assets/settings.png" onclick="settings()"/>
+			<img class="corner-buttons" src="assets/settings.png" onclick="settings()" />
 			<img class="right-corner-buttons" src="assets/fullscreen.png" onclick="toggleFullScreen()" />
 			<div class="menu-panels">
 				<h1 class="titles">Greedy Shark</h1>
