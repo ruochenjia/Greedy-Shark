@@ -140,6 +140,18 @@ class Spider extends MovableGameObject {
 	}
 }
 
+class Treasure extends MovableGameObject {
+	constructor() {
+		super(document.getElementById("treasure"), 0.2, 5);
+		this.isVisible = false;
+		this.updateScore();
+	}
+
+	updateScore() {
+		this.score = Math.random() > 0.8 ? 2000 : 1000;
+	}
+}
+
 class GreedyShark {
 	constructor(canvas, scoreDisplay, coinCount, spiderCount) {
 		this.canvas = canvas;
@@ -161,12 +173,15 @@ class GreedyShark {
 		this.player = new Player();
 		this.player.pos.y = this.height / 2;
 		this.player.pos.x = this.width / 10;
+		this.treasure = new Treasure();
+		this.treasure.pos.x = this.width;
+		this.treasure.pos.y = Math.random() * this.height;
+		this.spiderCount = spiderCount;
+		this.spiders = [];
+		this.spiders.push(new Spider());
 		this.coins = [];
 		for (let i = 0; i < coinCount; i++)
 			this.coins[i] = new Coin();
-		this.spiders = [];
-		for (let i = 0; i < spiderCount; i++)
-			this.spiders[i] = new Spider();
 		let eventListener = function(e) {
 			switch(e.type) {
 				case "mousedown":
@@ -259,6 +274,21 @@ class GreedyShark {
 					this.player.pos.y = yMax;
 			}
 		}
+		if (this.treasure.isVisible) {
+			this.treasure.pos.x -= this.treasure.speed * this.speedMultiple;
+			if (this.treasure.pos.x + this.treasure.width < 0) {
+				this.treasure.pos.x = this.width;
+				this.treasure.pos.y = Math.random() * this.height;
+				this.treasure.updateScore();
+				this.treasure.isVisible = false;
+			} else if (this.treasure.getCollisionShape().intersects(this.player.getCollisionShape())) {
+				this.treasure.pos.x = this.width;
+				this.treasure.pos.y = Math.random() * this.height;
+				this.updateScore(this.treasure.score);
+				this.treasure.updateScore();
+				this.treasure.isVisible = false;
+			}
+		}
 		this.coins.forEach((coin, i) => {
 			coin.pos.x -= coin.speed * this.speedMultiple;
 			if (coin.pos.x + coin.width < 0) {
@@ -266,6 +296,8 @@ class GreedyShark {
 				coin.pos.y = Math.random() * this.height;
 				coin.updateSpeed();
 				coin.updateScore();
+				if (!this.treasure.isVisible && this.speedMultiple > 1)
+					this.treasure.isVisible = Math.random() > 0.96;
 			} else if (coin.getCollisionShape().intersects(this.player.getCollisionShape())) {
 				coin.pos.x = this.width;
 				coin.pos.y = Math.random() * this.height;
@@ -273,7 +305,7 @@ class GreedyShark {
 				coin.updateSpeed();
 				coin.updateScore();
 				this.player.setTexture(this.player.mouseOpen);
-				setTimeout(()=> this.player.setTexture(this.player.mouseClose), 1000);
+				setTimeout(()=> this.player.setTexture(this.player.mouseClose), 500);
 			}
 		});
 		this.spiders.forEach((spider, i) => {
@@ -292,21 +324,42 @@ class GreedyShark {
 		this.score += score;
 		this.siScore += score;
 		this.scoreDisplay.innerHTML = "Score: " + this.score;
-		if (this.siScore >= 300) {
-			this.speedMultiple += 0.1;
+		if (this.siScore >= 200) {
 			this.siScore = 0;
+			if (this.spiders.length < this.spiderCount)
+				this.spiders.push(new Spider());
+			else this.speedMultiple += 0.1;
+		}
+		if (this.score >= 5000) {
+			this.spiders.forEach((spider, i) => {
+				spider.setTexture(document.getElementById("spider-inverted"));
+			});
 		}
 	}
 
 	draw() {
-		this.context.drawImage(this.background.img, this.background.pos.x, this.background.pos.y, this.width, this.height);
-		this.context.drawImage(this.background1.img, this.background1.pos.x, this.background1.pos.y, this.width, this.height);
-		this.context.drawImage(this.player.img, this.player.pos.x, this.player.pos.y, this.player.width, this.player.height);
+		if (this.score >= 5000) {
+			this.context.fillStyle = "#000000";
+			this.context.fillRect(0, 0, this.width, this.height);
+		} else {
+			this.drawBackground(this.background);
+			this.drawBackground(this.background1);
+		}
+		this.drawGameObject(this.player);
+		this.drawGameObject(this.treasure);
 		this.coins.forEach((coin, i) => {
-			this.context.drawImage(coin.img, coin.pos.x, coin.pos.y, coin.width, coin.height);
+			this.drawGameObject(coin);
 		});
 		this.spiders.forEach((spider, i) => {
-			this.context.drawImage(spider.img, spider.pos.x, spider.pos.y, spider.width, spider.height);
+			this.drawGameObject(spider);
 		});
+	}
+
+	drawBackground(obj) {
+		this.context.drawImage(obj.img, obj.pos.x, obj.pos.y, this.width, this.height);
+	}
+
+	drawGameObject(obj) {
+		this.context.drawImage(obj.img, obj.pos.x, obj.pos.y, obj.width, obj.height);
 	}
 }
