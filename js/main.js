@@ -84,7 +84,7 @@ class Player extends GameObject {
 
 class Coin extends MovableGameObject {
 	constructor() {
-		super(document.getElementById("coin100"), 0.1, 9, 5, 13);
+		super(document.getElementById("coin100"), 0.25, 9, 5, 13);
 		let date = new Date();
 		let month = date.getMonth() + 1;
 		let day = date.getDate();
@@ -136,7 +136,7 @@ class Coin extends MovableGameObject {
 
 class Spider extends MovableGameObject {
 	constructor() {
-		super(document.getElementById("spider"), 0.1, 8, 5, 11);
+		super(document.getElementById("spider"), 0.2, 8, 5, 11);
 	}
 }
 
