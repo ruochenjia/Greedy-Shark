@@ -30,7 +30,7 @@ body {
 	text-align: center;
 	vertical-align: middle;
 	line-height: 96px;
-	font-size: 48px;
+	font-size: 36px;
 	margin-top: 20px;
 	margin-bottom: 20px;
 	color: black;
@@ -73,7 +73,7 @@ body {
 	height: fit-content;
 	width: 100%;
 	text-align: center;
-	font-size: 64px;
+	font-size: 48px;
 	margin-top: 20px;
 	margin-bottom: 20px;
 	color: white;
@@ -96,6 +96,7 @@ body {
 	height: 100%;
 	width: 100%;
 	background-image: url("assets/game_bg.jpg");
+	background-size: 100% 100%;
 }
 
 #game {
@@ -137,6 +138,18 @@ canvas {
 	-webkit-text-stroke-color: black;
 }
 
+#new-record {
+	position: absolute;
+	text-align: center;
+	font-size: 64px;
+	width: 100%;
+	height: fit-content;
+	color: white;
+	display: none;
+	-webkit-text-stroke-width: 2px;
+	-webkit-text-stroke-color: black;
+}
+
 #final-score {
 	height: fit-content;
 	width: 100%;
@@ -155,8 +168,9 @@ canvas {
 				<body></body>
 			</html>
 		</script>
-		<script type="text/javascript" src="js/userstorage.js"></script>
-		<script type="text/javascript" src="js/main.js"></script>
+		<script type="text/javascript" src="js/userstorage.js?version=1"></script>
+		<script type="text/javascript" src="js/main.js?version=1"></script>
+		<script type="text/javascript" src="https://mindrex.github.io/win98dialog/assets/dialog.js"></script>
 	</head>
 	<body>
 		<noscript>
@@ -173,11 +187,12 @@ canvas {
 			</div>
 		</div>
 		<div id="game">
-			<canvas id="canvas" width="1280" height="720">
+			<canvas id="canvas" width="1290" height="720">
 				<p class="warnings"><strong>ERROR: </strong>Your browser does not support html5 canvas, please use a supported browser</p>
 			</canvas>
 			<img class="corner-buttons" src="assets/pause.png" onclick="pause()"/>
 			<div id="score"></div>
+			<div id="new-record">NEW RECORD!</div>
 			<div id="pause-menu">
 				<div class="menu-panels">
 					<h1 class="titles">Paused</h1>
@@ -214,6 +229,18 @@ canvas {
 			<img id="treasure" src="assets/treasure.png" />
 		</div>
 		<script type="text/javascript">
+function remove(obj) {
+	try {
+		// prefer using this for compatibility
+		obj.parentNode.removeChild(obj);
+	} catch(err) {
+		// will not cause errors if parent is null
+		// but is not supported by some browsers
+		obj.remove();
+	}
+}
+
+let body = document.getElementsByTagName("body")[0];
 let menu = document.getElementById("menu");
 let game = document.getElementById("game");
 let pauseMenu = document.getElementById("pause-menu");
@@ -221,14 +248,18 @@ let gameOverMenu = document.getElementById("gameover-menu");
 let canvas = document.getElementById("canvas");
 let score = document.getElementById("score");
 let finalScore = document.getElementById("final-score");
+let nr = document.getElementById("new-record");
 let gfr = null;
 
-game.parentNode.removeChild(game);
+// canvas.width = window.innerWidth;
+// canvas.height = window.innerHeight;
+
+remove(game);
 
 function start() {
-	pauseMenu.remove();
-	gameOverMenu.remove();
-	gfr = new GreedyShark(canvas, score, 3, 3);
+	remove(pauseMenu);
+	remove(gameOverMenu);
+	gfr = new GreedyShark(canvas, score, nr, 3, 3);
 	gfr.gameOverCallback = function() {
 		game.appendChild(gameOverMenu);
 		let score = gfr.score;
@@ -266,8 +297,8 @@ function toggleFullScreen() {
 
 function classic() {
 	if (document.readyState === "complete") {
-		menu.parentNode.appendChild(game);
-		menu.parentNode.removeChild(menu);
+		remove(menu);
+		body.appendChild(game);
 		start();
 	}
 }
@@ -290,7 +321,7 @@ function pause() {
 }
 
 function resume() {
-	game.removeChild(pauseMenu);
+	remove(pauseMenu);
 	gfr.isPaused = false;
 }
 
@@ -301,8 +332,8 @@ function restart() {
 
 function stop() {
 	gfr.stop();
-	game.parentNode.appendChild(menu);
-	game.parentNode.removeChild(game);
+	body.appendChild(menu);
+	remove(game);
 }
 
 function settings() {
