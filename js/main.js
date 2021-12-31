@@ -84,7 +84,7 @@ class Player extends GameObject {
 
 class Coin extends MovableGameObject {
 	constructor() {
-		super(document.getElementById("coin100"), 0.25, 9, 5, 13);
+		super(document.getElementById("coin100"), 0.25, 9, 6, 12);
 		let date = new Date();
 		let month = date.getMonth() + 1;
 		let day = date.getDate();
@@ -153,7 +153,7 @@ class Treasure extends MovableGameObject {
 }
 
 class GreedyShark {
-	constructor(canvas, scoreDisplay, coinCount, spiderCount) {
+	constructor(canvas, scoreDisplay, nr, coinCount, spiderCount) {
 		this.canvas = canvas;
 		this.context = canvas.getContext("2d");
 		this.isPaused = false;
@@ -161,10 +161,13 @@ class GreedyShark {
 		this.score = 0;
 		this.speedMultiple = 1;
 		this.siScore = 0;
+		this.bestScore = 0;
 		this.scoreDisplay = scoreDisplay;
 		this.gameOverCallback = null;
 		this.width = this.canvas.width;
 		this.height = this.canvas.height;
+		this.nr = nr;
+		this.showNr = false;
 		let that = this;
 		let bg = Math.random() < 0.5 ? document.getElementById("game-bg1") : document.getElementById("game-bg2");
 		this.background = new Background(bg);
@@ -180,6 +183,7 @@ class GreedyShark {
 		this.spiders = [];
 		this.spiders.push(new Spider());
 		this.coins = [];
+		console.log(coinCount);
 		for (let i = 0; i < coinCount; i++)
 			this.coins[i] = new Coin();
 		let eventListener = function(e) {
@@ -227,6 +231,10 @@ class GreedyShark {
 		document.addEventListener("keydown", eventListener);
 		document.addEventListener("keyup", eventListener);
 		this.eventListener = eventListener;
+		if (userData != null) {
+			if ((this.bestScore = userData.bestScore) > 0)
+				this.showNr = true;
+		}
 	}
 
 	loop() {
@@ -251,17 +259,15 @@ class GreedyShark {
 		cancelAnimationFrame(this.af);
 		this.canvas.removeEventListener("mousedown", this.eventListener);
 		this.canvas.removeEventListener("mouseup", this.eventListener);
+		this.canvas.removeEventListener("touchstart", this.eventListener);
+		this.canvas.removeEventListener("touchend", this.eventListener);
 		document.removeEventListener("keydown", this.eventListener);
 		document.removeEventListener("keyup", this.eventListener);
 	}
 
 	update() {
-		this.background.pos.x -= this.background.speed * this.speedMultiple;
-		this.background1.pos.x -= this.background1.speed * this.speedMultiple;
-		if (this.background.pos.x + this.background.width < 0)
-			this.background.pos.x = this.width;
-		if (this.background1.pos.x + this.background1.width < 0)
-			this.background1.pos.x = this.width;
+		this.updateGameObject(this.background);
+		this.updateGameObject(this.background1);
 		if (!this.player.isLocked) {
 			if (this.player.isGoingUp)
 				this.player.pos.y -= 10;
@@ -275,9 +281,7 @@ class GreedyShark {
 			}
 		}
 		if (this.treasure.isVisible) {
-			this.treasure.pos.x -= this.treasure.speed * this.speedMultiple;
-			if (this.treasure.pos.x + this.treasure.width < 0) {
-				this.treasure.pos.x = this.width;
+			if (this.updateGameObject(this.treasure)) {
 				this.treasure.pos.y = Math.random() * this.height;
 				this.treasure.updateScore();
 				this.treasure.isVisible = false;
@@ -290,9 +294,7 @@ class GreedyShark {
 			}
 		}
 		this.coins.forEach((coin, i) => {
-			coin.pos.x -= coin.speed * this.speedMultiple;
-			if (coin.pos.x + coin.width < 0) {
-				coin.pos.x = this.width;
+			if (this.updateGameObject(coin)) {
 				coin.pos.y = Math.random() * this.height;
 				coin.updateSpeed();
 				coin.updateScore();
@@ -309,9 +311,7 @@ class GreedyShark {
 			}
 		});
 		this.spiders.forEach((spider, i) => {
-			spider.pos.x -= spider.speed * this.speedMultiple;
-			if (spider.pos.x + spider.width < 0) {
-				spider.pos.x = this.width;
+			if (this.updateGameObject(spider)) {
 				spider.pos.y = Math.random() * this.height;
 				spider.updateSpeed();
 			} else if (spider.getCollisionShape().intersects(this.player.getCollisionShape())) {
@@ -320,10 +320,24 @@ class GreedyShark {
 		});
 	}
 
+	updateGameObject(obj) {
+		obj.pos.x -= Math.floor(obj.speed * this.speedMultiple);
+		if (obj.pos.x + obj.width < 0) {
+			obj.pos.x = this.width;
+			return true;
+		}
+		return false;
+	}
+
 	updateScore(score) {
 		this.score += score;
 		this.siScore += score;
 		this.scoreDisplay.innerHTML = "Score: " + this.score;
+		if (this.showNr && this.score > this.bestScore) {
+			this.nr.style.display = "block";
+			this.showNr = false;
+			setTimeout(() => this.nr.style.display = "none", 2000);
+		}
 		if (this.siScore >= 200) {
 			this.siScore = 0;
 			if (this.spiders.length < this.spiderCount)
