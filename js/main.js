@@ -153,7 +153,7 @@ class Treasure extends MovableGameObject {
 }
 
 class GreedyShark {
-	constructor(canvas, scoreDisplay, nr, coinCount, spiderCount) {
+	constructor(canvas, scoreDisplay, nr, preset) {
 		this.canvas = canvas;
 		this.context = canvas.getContext("2d");
 		this.isPaused = false;
@@ -168,6 +168,8 @@ class GreedyShark {
 		this.height = this.canvas.height;
 		this.nr = nr;
 		this.showNr = false;
+		this.breakPoint = preset.breakPoint;
+		this.bp = false;
 		let that = this;
 		let bg = Math.random() < 0.5 ? document.getElementById("game-bg1") : document.getElementById("game-bg2");
 		this.background = new Background(bg);
@@ -179,12 +181,11 @@ class GreedyShark {
 		this.treasure = new Treasure();
 		this.treasure.pos.x = this.width;
 		this.treasure.pos.y = Math.random() * this.height;
-		this.spiderCount = spiderCount;
+		this.spiderCount = preset.spiders;
 		this.spiders = [];
 		this.spiders.push(new Spider());
 		this.coins = [];
-		console.log(coinCount);
-		for (let i = 0; i < coinCount; i++)
+		for (let i = 0; i < preset.coins; i++)
 			this.coins[i] = new Coin();
 		let eventListener = function(e) {
 			switch(e.type) {
@@ -266,8 +267,10 @@ class GreedyShark {
 	}
 
 	update() {
-		this.updateGameObject(this.background);
-		this.updateGameObject(this.background1);
+		if (!this.bp) {
+			this.updateGameObject(this.background);
+			this.updateGameObject(this.background1);
+		}
 		if (!this.player.isLocked) {
 			if (this.player.isGoingUp)
 				this.player.pos.y -= 10;
@@ -344,15 +347,16 @@ class GreedyShark {
 				this.spiders.push(new Spider());
 			else this.speedMultiple += 0.1;
 		}
-		if (this.score >= 5000) {
+		if (this.score >= this.breakPoint && this.speedMultiple > 1 && !this.bp) {
 			this.spiders.forEach((spider, i) => {
 				spider.setTexture(document.getElementById("spider-inverted"));
 			});
+			this.bp = true;
 		}
 	}
 
 	draw() {
-		if (this.score >= 5000) {
+		if (this.bp) {
 			this.context.fillStyle = "#000000";
 			this.context.fillRect(0, 0, this.width, this.height);
 		} else {
