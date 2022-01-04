@@ -160,17 +160,8 @@ canvas {
 	color: white;
 }
 		</style>
-		<script type="text/html">
-			<html>
-				<head>
-					<script type="text/javascript" src="js/test.js"></script>
-				</head>
-				<body></body>
-			</html>
-		</script>
-		<script type="text/javascript" src="js/userstorage.js?version=1"></script>
-		<script type="text/javascript" src="js/main.js?version=1"></script>
-		<script type="text/javascript" src="https://mindrex.github.io/win98dialog/assets/dialog.js"></script>
+		<script type="text/javascript" src="js/userstorage.js?version=2"></script>
+		<script type="text/javascript" src="js/main.js?version=2"></script>
 	</head>
 	<body>
 		<noscript>
@@ -249,6 +240,23 @@ let canvas = document.getElementById("canvas");
 let score = document.getElementById("score");
 let finalScore = document.getElementById("final-score");
 let nr = document.getElementById("new-record");
+
+let presets = {
+	classic: {
+		spiders: 3,
+		coins: 3,
+		timeLimit: 0, 
+		breakPoint: 3000
+	},
+
+	arcade: {
+		spiders: 0,
+		coins: 5,
+		timeLimit: 60,
+		breakPoint: 5000
+	}
+};
+
 let gfr = null;
 
 // canvas.width = window.innerWidth;
@@ -259,7 +267,7 @@ remove(game);
 function start() {
 	remove(pauseMenu);
 	remove(gameOverMenu);
-	gfr = new GreedyShark(canvas, score, nr, 3, 3);
+	gfr = new GreedyShark(canvas, score, nr, presets.classic);
 	gfr.gameOverCallback = function() {
 		game.appendChild(gameOverMenu);
 		let score = gfr.score;
