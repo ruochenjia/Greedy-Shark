@@ -141,6 +141,18 @@ canvas {
 	-webkit-text-stroke-color: black;
 }
 
+#timer {
+	position: absolute;
+	text-align: center;
+	font-size: 36px;
+	width: 100%;
+	height: fit-content;
+	margin-top: 10px;
+	color: white;
+	-webkit-text-stroke-width: 1px;
+	-webkit-text-stroke-color: black;
+}
+
 #new-record {
 	position: absolute;
 	text-align: center;
@@ -197,6 +209,7 @@ canvas {
 			<img class="corner-buttons" src="assets/pause.png" onclick="pause()"/>
 			<div id="score"></div>
 			<div id="new-record">NEW RECORD!</div>
+			<div id="timer"></div>
 			<div id="pause-menu">
 				<div class="menu-panels">
 					<h1 class="titles">Paused</h1>
@@ -252,19 +265,24 @@ let pauseMenu = document.getElementById("pause-menu");
 let gameOverMenu = document.getElementById("gameover-menu");
 let canvas = document.getElementById("canvas");
 let score = document.getElementById("score");
+let timer = document.getElementById("timer");
 let finalScore = document.getElementById("final-score");
 let finalDist = document.getElementById("final-dist");
 let nr = document.getElementById("new-record");
 
 let presets = {
 	classic: {
+		name: "classic",
+		speedMultiple: 1,
 		spiders: 3,
 		coins: 3,
-		timeLimit: 0, 
+		timeLimit: -1, 
 		breakPoint: 3000
 	},
 
 	arcade: {
+		name: "arcade",
+		speedMultiple: 1.5,
 		spiders: 0,
 		coins: 5,
 		timeLimit: 60,
@@ -279,16 +297,27 @@ let gfr = null;
 
 remove(game);
 
-function start() {
+function start(preset) {
 	remove(pauseMenu);
 	remove(gameOverMenu);
-	gfr = new GreedyShark(canvas, score, nr, presets.classic);
-	gfr.gameOverCallback = function() {
+	gfr = new GreedyShark(canvas, score, nr, timer, preset);
+	gfr.gameOverCallback = function(gfr) {
 		game.appendChild(gameOverMenu);
 		let score = gfr.score;
 		let dist = Math.round(gfr.distance);
-		let bestScore = parseInt(userData.bestScore);
-		let bestDist = parseInt(userData.bestDistance);
+		let bestScore = null;
+		let bestDist = null;
+		switch(gfr.preset.name) {
+			case "classic":
+				bestScore = parseInt(userData.bestScore);
+				bestDist = parseInt(userData.bestDistance);
+				break;
+			case "arcade":
+				bestScore = parseInt(userData.arcadeBestScore);
+				bestDist = parseInt(userData.bestDist);
+				break;
+		}
+		
 		if (score < bestScore) {
 			finalScore.innerHTML = "Score: " + score + " (Best: " + bestScore + ")";
 		} else {
@@ -304,7 +333,7 @@ function start() {
 			userData.update();
 		}
 	};
-	gfr.loop();
+	gfr.start();
 	userData.update();
 }
 
@@ -331,22 +360,24 @@ function classic() {
 	if (document.readyState === "complete") {
 		remove(menu);
 		body.appendChild(game);
-		start();
-	}
+		start(presets.classic);
+	} else alert("Please wait until page fully loaded.");
 	return true;
 }
 
 function arcade() {
 	if (document.readyState === "complete") {
-		alert("Coming soon!");
-	}
+		remove(menu);
+		body.appendChild(game);
+		start(presets.arcade);
+	} else alert("Please wait until page fully loaded.");
 	return true;
 }
 
 function custom() {
 	if (document.readyState === "complete") {
 		alert("Coming soon!");
-	}
+	} else alert("Please wait until page fully loaded.");
 	return true;
 }
 
@@ -364,7 +395,7 @@ function resume() {
 
 function restart() {
 	gfr.stop();
-	start();
+	start(gfr.preset);
 	return true;
 }
 
@@ -378,7 +409,7 @@ function stop() {
 function settings() {
 	if (document.readyState === "complete") {
 		alert("Coming soon!");
-	}
+	} else alert("Please wait until page fully loaded.");
 	return true;
 }
 		</script>
