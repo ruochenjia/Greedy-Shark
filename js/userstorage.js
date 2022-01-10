@@ -34,6 +34,7 @@ class UserData {
 		this.level = optCookie("level", 0);
 		this.money = optCookie("money", 0);
 		this.bestScore = optCookie("best_score", 0);
+		this.bestDistance = optCookie("best_dist", 0);
 	}
 
 	update() {
@@ -42,6 +43,7 @@ class UserData {
 		setCookie("level", this.level);
 		setCookie("money", this.money);
 		setCookie("best_score", this.bestScore);
+		setCookie("best_dist", this.bestDistance);
 	}
 }
 
