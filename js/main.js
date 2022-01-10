@@ -153,16 +153,18 @@ class Treasure extends MovableGameObject {
 }
 
 class GreedyShark {
-	constructor(canvas, scoreDisplay, nr, preset) {
+	constructor(canvas, scoreDisplay, nr, uiTimer, preset) {
 		this.canvas = canvas;
 		this.context = canvas.getContext("2d");
 		this.isPaused = false;
 		this.isGameOver = false;
 		this.score = 0;
 		this.distance = 0;
-		this.speedMultiple = 1;
+		this.speedMultiple = preset.speedMultiple;
 		this.siScore = 0;
 		this.bestScore = 0;
+		this.timeLimit = preset.timeLimit;
+		this.timerUi = uiTimer;
 		this.scoreDisplay = scoreDisplay;
 		this.gameOverCallback = null;
 		this.width = this.canvas.width;
@@ -171,6 +173,7 @@ class GreedyShark {
 		this.showNr = false;
 		this.breakPoint = preset.breakPoint;
 		this.bp = false;
+		this.preset = preset;
 		let that = this;
 		let bg = Math.random() < 0.5 ? document.getElementById("game-bg1") : document.getElementById("game-bg2");
 		this.background = new Background(bg);
@@ -184,7 +187,8 @@ class GreedyShark {
 		this.treasure.pos.y = Math.random() * this.height;
 		this.spiderCount = preset.spiders;
 		this.spiders = [];
-		this.spiders.push(new Spider());
+		if (this.spiderCount > 0)
+			this.spiders.push(new Spider());
 		this.coins = [];
 		for (let i = 0; i < preset.coins; i++)
 			this.coins[i] = new Coin();
@@ -239,12 +243,39 @@ class GreedyShark {
 		}
 	}
 
+	start() {
+		if (this.timeLimit > 0) {
+			let time = this.timeLimit;
+			let that = this;
+			let updateTimer = function() {
+				if (!that.isPaused && !that.isGameOver) {
+					time--;
+					let min = Math.floor(time / 60);
+					let sec = time % 60;
+					if (min < 10)
+						min = `0${min}`;
+					if (sec < 10)
+						sec = `0${sec}`;
+					that.timerUi.innerHTML = `${min}:${sec}`;
+					if (time < 0) {
+						that.isGameOver = true;
+						that.timerUi.innerHTML = "";
+						return "null";
+					}
+				}
+				setTimeout(updateTimer, 1000);
+			}
+			updateTimer();
+		}
+		this.loop();
+	}
+
 	loop() {
 		if (this.isGameOver) {
 			this.stop();
 			this.draw();
 			if (this.gameOverCallback != null)
-				this.gameOverCallback();
+				this.gameOverCallback(this);
 		} else {
 			if (!this.isPaused) {
 				this.context.clearRect(0, 0, this.width, this.height);
@@ -256,8 +287,10 @@ class GreedyShark {
 	}
 
 	stop() {
+		this.isGameOver = true;
 		this.context.clearRect(0, 0, this.width, this.height);
 		this.scoreDisplay.innerHTML = "";
+		this.timerUi.innerHTML = "";
 		cancelAnimationFrame(this.af);
 		this.canvas.removeEventListener("mousedown", this.eventListener);
 		this.canvas.removeEventListener("mouseup", this.eventListener);
