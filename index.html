@@ -34,6 +34,7 @@ body {
 	margin-top: 20px;
 	margin-bottom: 20px;
 	color: black;
+	cursor: pointer;
 	background-image: url("assets/ui_btn_normal.png");
 	background-size: 100% 100%;
 }
@@ -47,6 +48,7 @@ body {
 	height: 72px;
 	width: 72px;
 	padding: 20px;
+	cursor: pointer;
 	background-image: url("assets/ui_btn_normal.png");
 	background-size: 100% 100%;
 }
@@ -61,6 +63,7 @@ body {
 	width: 72px;
 	padding: 20px;
 	right: 0px;
+	cursor: pointer;
 	background-image: url("assets/ui_btn_normal.png");
 	background-size: 100% 100%;
 }
@@ -156,12 +159,22 @@ canvas {
 	text-align: center;
 	font-size: 24px;
 	margin-top: 10px;
+	margin-bottom: 5px;
+	color: white;
+}
+
+#final-dist {
+	height: fit-content;
+	width: 100%;
+	text-align: center;
+	font-size: 24px;
+	margin-top: 5px;
 	margin-bottom: 10px;
 	color: white;
 }
 		</style>
-		<script type="text/javascript" src="js/userstorage.js?version=2"></script>
-		<script type="text/javascript" src="js/main.js?version=2"></script>
+		<script type="text/javascript" src="js/userstorage.js?version=1"></script>
+		<script type="text/javascript" src="js/main.js?version=1"></script>
 	</head>
 	<body>
 		<noscript>
@@ -195,7 +208,8 @@ canvas {
 			<div id="gameover-menu">
 				<div class="menu-panels">
 					<h1 class="titles">Game Over</h1>
-					<div id="final-score">Score: </div>
+					<div id="final-score">Score: $score</div>
+					<div id="final-dist">Distance: $dist</div>
 					<div class="buttons" onclick="restart()">Restart</div>
 					<div class="buttons" onclick="stop()">Menu</div>
 				</div>
@@ -239,6 +253,7 @@ let gameOverMenu = document.getElementById("gameover-menu");
 let canvas = document.getElementById("canvas");
 let score = document.getElementById("score");
 let finalScore = document.getElementById("final-score");
+let finalDist = document.getElementById("final-dist");
 let nr = document.getElementById("new-record");
 
 let presets = {
@@ -271,12 +286,21 @@ function start() {
 	gfr.gameOverCallback = function() {
 		game.appendChild(gameOverMenu);
 		let score = gfr.score;
+		let dist = Math.round(gfr.distance);
 		let bestScore = parseInt(userData.bestScore);
+		let bestDist = parseInt(userData.bestDistance);
 		if (score < bestScore) {
 			finalScore.innerHTML = "Score: " + score + " (Best: " + bestScore + ")";
 		} else {
 			finalScore.innerHTML = "Score: " + score;
 			userData.bestScore = score;
+			userData.update();
+		}
+		if (dist < bestDist) {
+			finalDist.innerHTML = "Distance: " + dist + " (Best: " + bestDist + ")";
+		} else {
+			finalDist.innerHTML = "Distance: " + dist;
+			userData.bestDistance = dist;
 			userData.update();
 		}
 	};
@@ -309,45 +333,53 @@ function classic() {
 		body.appendChild(game);
 		start();
 	}
+	return true;
 }
 
 function arcade() {
 	if (document.readyState === "complete") {
 		alert("Coming soon!");
 	}
+	return true;
 }
 
 function custom() {
 	if (document.readyState === "complete") {
 		alert("Coming soon!");
 	}
+	return true;
 }
 
 function pause() {
 	game.appendChild(pauseMenu);
 	gfr.isPaused = true;
+	return true;
 }
 
 function resume() {
 	remove(pauseMenu);
 	gfr.isPaused = false;
+	return true;
 }
 
 function restart() {
 	gfr.stop();
 	start();
+	return true;
 }
 
 function stop() {
 	gfr.stop();
 	body.appendChild(menu);
 	remove(game);
+	return true;
 }
 
 function settings() {
 	if (document.readyState === "complete") {
 		alert("Coming soon!");
 	}
+	return true;
 }
 		</script>
 	</body>
