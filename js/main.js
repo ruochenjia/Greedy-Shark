@@ -159,6 +159,7 @@ class GreedyShark {
 		this.isPaused = false;
 		this.isGameOver = false;
 		this.score = 0;
+		this.distance = 0;
 		this.speedMultiple = 1;
 		this.siScore = 0;
 		this.bestScore = 0;
@@ -321,10 +322,11 @@ class GreedyShark {
 				this.isGameOver = true;
 			}
 		});
+		this.distance += this.speedMultiple;
 	}
 
 	updateGameObject(obj) {
-		obj.pos.x -= Math.floor(obj.speed * this.speedMultiple);
+		obj.pos.x -= obj.speed * this.speedMultiple;
 		if (obj.pos.x + obj.width < 0) {
 			obj.pos.x = this.width;
 			return true;
