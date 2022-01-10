@@ -1,13 +1,13 @@
 
-function setCookie(cname, cvalue, exdays = 30) {
+function setCookie(key, value, exdays = 30) {
 	const d = new Date();
 	d.setTime(d.getTime() + (exdays * 86400000));
 	let expires = "expires=" + d.toUTCString();
-	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+	document.cookie = key + "=" + value + ";" + expires + ";path=/";
 }
 
-function getCookie(cname) {
-	let name = cname + "=";
+function getCookie(key) {
+	let name = key + "=";
 	let ca = document.cookie.split(';');
 	for (let i = 0; i < ca.length; i++) {
 		let c = ca[i];
@@ -19,32 +19,32 @@ function getCookie(cname) {
 	return null;
 }
 
-function optCookie(name, defVal) {
-	let c = getCookie(name);
+function optCookie(key, defVal) {
+	let c = getCookie(key);
 	if (c == null) {
-		setCookie(name, defVal);
+		setCookie(key, defVal);
 		return defVal;
 	} else return c;
 }
 
-class UserData {
-	constructor() {
-		this.name = optCookie("name", "\u98fa");
-		this.id = optCookie("id", 0);
-		this.level = optCookie("level", 0);
-		this.money = optCookie("money", 0);
-		this.bestScore = optCookie("best_score", 0);
-		this.bestDistance = optCookie("best_dist", 0);
-	}
+let userData = getCookie("user_data");
+if (userData == null) {
+	userData = {
+		name: "",
+		id: 0,
+		level: 0,
+		money: 0,
+		bestScore: 0,
+		bestDistance: 0,
+		arcadeBestScore: 0,
+		arcadeBestDistance: 0,
+		customPresets: [],
+		preferences: {},
+		update: () => updateUserData() // deprecated
+	};
+} else userData = JSON.parse(userData);
 
-	update() {
-		setCookie("name", this.name);
-		setCookie("id", this.id);
-		setCookie("level", this.level);
-		setCookie("money", this.money);
-		setCookie("best_score", this.bestScore);
-		setCookie("best_dist", this.bestDistance);
-	}
+function updateUserData() {
+	let ud = JSON.stringify(userData);
+	setCookie("user_data", ud);
 }
-
-let userData = new UserData();
