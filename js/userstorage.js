@@ -31,16 +31,37 @@ let userData = getCookie("user_data");
 if (userData == null) {
 	userData = {
 		name: "",
+		email: "",
 		id: 0,
 		level: 0,
 		money: 0,
-		bestScore: 0,
-		bestDistance: 0,
-		arcadeBestScore: 0,
-		arcadeBestDistance: 0,
-		customPresets: [],
-		preferences: {},
-		update: () => updateUserData() // deprecated
+		presets: {
+			classic: {
+				name: "classic",
+				speedMultiple: 1,
+				spiders: 3,
+				coins: 3,
+				timeLimit: -1,
+				breakPoint: 3000,
+				bestScore: 0,
+				bestDistance: 0
+			},
+			arcade: {
+				name: "arcade",
+				speedMultiple: 1.5,
+				spiders: 0,
+				coins: 5,
+				timeLimit: 60,
+				breakPoint: 5000,
+				bestScore: 0,
+				bestDistance: 0
+			}
+		},
+		preferences: {
+			videoQuality: "high",
+			soundsEnabled: false,
+			musicEnabled: false
+		},
 	};
 } else userData = JSON.parse(userData);
 

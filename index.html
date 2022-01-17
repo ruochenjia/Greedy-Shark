@@ -269,27 +269,6 @@ let timer = document.getElementById("timer");
 let finalScore = document.getElementById("final-score");
 let finalDist = document.getElementById("final-dist");
 let nr = document.getElementById("new-record");
-
-let presets = {
-	classic: {
-		name: "classic",
-		speedMultiple: 1,
-		spiders: 3,
-		coins: 3,
-		timeLimit: -1, 
-		breakPoint: 3000
-	},
-
-	arcade: {
-		name: "arcade",
-		speedMultiple: 1.5,
-		spiders: 0,
-		coins: 5,
-		timeLimit: 60,
-		breakPoint: 5000
-	}
-};
-
 let gfr = null;
 
 // canvas.width = window.innerWidth;
@@ -305,36 +284,26 @@ function start(preset) {
 		game.appendChild(gameOverMenu);
 		let score = gfr.score;
 		let dist = Math.round(gfr.distance);
-		let bestScore = null;
-		let bestDist = null;
-		switch(gfr.preset.name) {
-			case "classic":
-				bestScore = parseInt(userData.bestScore);
-				bestDist = parseInt(userData.bestDistance);
-				break;
-			case "arcade":
-				bestScore = parseInt(userData.arcadeBestScore);
-				bestDist = parseInt(userData.bestDist);
-				break;
-		}
-		
-		if (score < bestScore) {
+		let preset = gfr.preset;
+		let bestScore = preset.bestScore;
+		let bestDist = preset.bestDist;
+		if (score < bestScore)
 			finalScore.innerHTML = "Score: " + score + " (Best: " + bestScore + ")";
-		} else {
+		else {
 			finalScore.innerHTML = "Score: " + score;
-			userData.bestScore = score;
-			userData.update();
+			preset.bestScore = score;
+			updateUserData();
 		}
-		if (dist < bestDist) {
+		if (dist < bestDist)
 			finalDist.innerHTML = "Distance: " + dist + " (Best: " + bestDist + ")";
-		} else {
+		else {
 			finalDist.innerHTML = "Distance: " + dist;
-			userData.bestDistance = dist;
-			userData.update();
+			preset.bestDistance = dist;
+			updateUserData();
 		}
 	};
 	gfr.start();
-	userData.update();
+	updateUserData();
 }
 
 function toggleFullScreen() {
@@ -356,29 +325,34 @@ function toggleFullScreen() {
 	}
 }
 
+function checkPageState() {
+	if (document.readyState != "complete") {
+		alert("Please wait until page fully loaded.");
+		return false;
+	}
+	return true;
+}
+
 function classic() {
-	if (document.readyState === "complete") {
+	if (checkPageState()) {
 		remove(menu);
 		body.appendChild(game);
-		start(presets.classic);
-	} else alert("Please wait until page fully loaded.");
-	return true;
+		start(userData.presets.classic);
+	}
 }
 
 function arcade() {
-	if (document.readyState === "complete") {
+	if (checkPageState()) {
 		remove(menu);
 		body.appendChild(game);
-		start(presets.arcade);
-	} else alert("Please wait until page fully loaded.");
-	return true;
+		start(userData.presets.arcade);
+	}
 }
 
 function custom() {
-	if (document.readyState === "complete") {
+	if (checkPageState()) {
 		alert("Coming soon!");
-	} else alert("Please wait until page fully loaded.");
-	return true;
+	}
 }
 
 function pause() {
@@ -407,10 +381,9 @@ function stop() {
 }
 
 function settings() {
-	if (document.readyState === "complete") {
+	if (checkPageState()) {
 		alert("Coming soon!");
-	} else alert("Please wait until page fully loaded.");
-	return true;
+	}
 }
 		</script>
 	</body>

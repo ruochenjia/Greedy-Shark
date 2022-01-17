@@ -162,7 +162,8 @@ class GreedyShark {
 		this.distance = 0;
 		this.speedMultiple = preset.speedMultiple;
 		this.siScore = 0;
-		this.bestScore = 0;
+		this.bestScore = preset.bestScore;
+		this.bestDist = preset.bestDist;
 		this.timeLimit = preset.timeLimit;
 		this.timerUi = uiTimer;
 		this.scoreDisplay = scoreDisplay;
@@ -237,18 +238,15 @@ class GreedyShark {
 		document.addEventListener("keydown", eventListener);
 		document.addEventListener("keyup", eventListener);
 		this.eventListener = eventListener;
-		if (userData != null) {
-			if ((this.bestScore = userData.bestScore) > 0)
-				this.showNr = true;
-		}
+		if (this.bestScore > 0)
+			this.showNr = true;
 	}
 
 	start() {
 		if (this.timeLimit > 0) {
 			let time = this.timeLimit;
-			let that = this;
-			let updateTimer = function() {
-				if (!that.isPaused && !that.isGameOver) {
+			let updateTimer = () => {
+				if (!this.isPaused && !this.isGameOver) {
 					time--;
 					let min = Math.floor(time / 60);
 					let sec = time % 60;
@@ -256,41 +254,40 @@ class GreedyShark {
 						min = `0${min}`;
 					if (sec < 10)
 						sec = `0${sec}`;
-					that.timerUi.innerHTML = `${min}:${sec}`;
+					this.timerUi.innerHTML = `${min}:${sec}`;
+					if (time == 5)
+						this.timerUi.style.color = "red";
 					if (time < 0) {
-						that.isGameOver = true;
-						that.timerUi.innerHTML = "";
+						this.isGameOver = true;
+						this.timerUi.innerHTML = "";
 						return "null";
 					}
 				}
 				setTimeout(updateTimer, 1000);
-			}
+			};
 			updateTimer();
 		}
-		this.loop();
-	}
-
-	loop() {
-		if (this.isGameOver) {
-			this.stop();
-			this.draw();
-			if (this.gameOverCallback != null)
-				this.gameOverCallback(this);
-		} else {
-			if (!this.isPaused) {
-				this.context.clearRect(0, 0, this.width, this.height);
-				this.update();
-				this.draw();
+		let loop = () => {
+			if (!this.isGameOver) {
+				if (!this.isPaused) {
+					this.update();
+					this.draw();
+				}
+				this.af = requestAnimationFrame(loop);
+			} else {
+				this.stop();
+				if (this.gameOverCallback != null)
+					this.gameOverCallback(this);
 			}
-			this.af = requestAnimationFrame(() => this.loop());
-		}
+		};
+		loop();
 	}
 
 	stop() {
 		this.isGameOver = true;
-		this.context.clearRect(0, 0, this.width, this.height);
 		this.scoreDisplay.innerHTML = "";
 		this.timerUi.innerHTML = "";
+		this.timerUi.style.color = "white";
 		cancelAnimationFrame(this.af);
 		this.canvas.removeEventListener("mousedown", this.eventListener);
 		this.canvas.removeEventListener("mouseup", this.eventListener);
@@ -301,10 +298,7 @@ class GreedyShark {
 	}
 
 	update() {
-		if (!this.bp) {
-			this.updateGameObject(this.background);
-			this.updateGameObject(this.background1);
-		}
+		this.updateBg();
 		if (!this.player.isLocked) {
 			if (this.player.isGoingUp)
 				this.player.pos.y -= 10;
@@ -391,13 +385,8 @@ class GreedyShark {
 	}
 
 	draw() {
-		if (this.bp) {
-			this.context.fillStyle = "#000000";
-			this.context.fillRect(0, 0, this.width, this.height);
-		} else {
-			this.drawBackground(this.background);
-			this.drawBackground(this.background1);
-		}
+		this.context.clearRect(0, 0, this.width, this.height);
+		this.drawBg();
 		this.drawGameObject(this.player);
 		this.drawGameObject(this.treasure);
 		this.coins.forEach((coin, i) => {
@@ -408,11 +397,24 @@ class GreedyShark {
 		});
 	}
 
-	drawBackground(obj) {
-		this.context.drawImage(obj.img, obj.pos.x, obj.pos.y, this.width, this.height);
-	}
-
 	drawGameObject(obj) {
 		this.context.drawImage(obj.img, obj.pos.x, obj.pos.y, obj.width, obj.height);
+	}
+
+	updateBg() {
+		if (!this.bp) {
+			this.updateGameObject(this.background);
+			this.updateGameObject(this.background1);
+		}
+	}
+
+	drawBg() {
+		if (this.bp) {
+			this.context.fillStyle = "#000000";
+			this.context.fillRect(0, 0, this.width, this.height);
+		} else {
+			this.context.drawImage(this.background.img, this.background.pos.x, this.background.pos.y, this.width, this.height);
+			this.context.drawImage(this.background1.img, this.background1.pos.x, this.background1.pos.y, this.width, this.height);
+		}
 	}
 }
